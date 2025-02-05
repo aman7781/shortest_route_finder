@@ -16,24 +16,26 @@ class Route {
 
 class Graph {
     private Map<String, List<Route>> allRoutes = new HashMap<>();
+    private List<String> alldestinations = new ArrayList<>();
 
     public void addRoute(String source, String destination, String medium, double price, double time) {
         Route route = new Route(medium, destination, price, time);
         allRoutes.putIfAbsent(source, new ArrayList<>());
         allRoutes.get(source).add(route);
-        Route reverseRoute = new Route(medium, source, price, time);
-        allRoutes.putIfAbsent(destination, new ArrayList<>());
-        allRoutes.get(destination).add(reverseRoute);
+        alldestinations.add(destination);
     }
 
     public List<String> findShortestPath(String source, String destination, String searchMode) {
-        if (!allRoutes.containsKey(source) || !allRoutes.containsKey(destination)) {
+        if (!allRoutes.containsKey(source) || !alldestinations.contains(destination)) {
             return Collections.emptyList();
         }
 
         Map<String, Double> weights = new HashMap<>();
         Map<String, List<String>> prev = new HashMap<>();
         for (String city : allRoutes.keySet()) {
+            weights.put(city, Double.MAX_VALUE);
+        }
+        for(String city : alldestinations){
             weights.put(city, Double.MAX_VALUE);
         }
         weights.put(source, 0.0);
@@ -71,12 +73,11 @@ class Graph {
         }
 
         List<String> ans = new ArrayList<>();
-        ans.add(destination);
         String currCity = destination;
         if (!prev.containsKey(currCity)) {
             return Collections.emptyList();
         }
-
+        ans.add(destination);
         while (true) {
             if(prev.get(currCity) == null){
                 break;
@@ -96,6 +97,8 @@ public class Main {
         routes.addRoute("Delhi", "Mumbai", "flight", 100.0, 60);
         routes.addRoute("Delhi", "Lucknow", "flight", 60.0, 60);
         routes.addRoute("Lucknow", "Mumbai", "flight", 20.0, 60);
+        routes.addRoute("Lucknow", "Mumbai", "train", 10.0, 200);
+        routes.addRoute("Delhi", "Mumbai", "train", 40.0, 200);
         List<String> ans = routes.findShortestPath("Delhi", "Mumbai", "price");
         if(ans.isEmpty()){
             System.out.println("No Routes Present between source and destination");
